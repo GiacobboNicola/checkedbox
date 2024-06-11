@@ -1,0 +1,41 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, guys!
+
+dotenv: [".env"]
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+      - go-task -l
+    silent: true
+
+  venv:
+    desc: create/update venv
+    cmds:
+      - python -m venv .venv --prompt checkedbox
+      - task: venv:update
+      - task: git:hooks
+    status:
+      - test -d .venv
+
+  venv:update:
+    cmds:
+      - .venv/bin/pip install -U pdm pip mypy pre-commit
+      #- .venv/bin/pip install -e ./checkedbox
+      - .venv/bin/pip install -r requirements.txt
+    preconditions:
+      - test -d .venv
+      - msg: "missing virtual env"
+
+  git:hooks:
+    desc: install pre-commit
+    cmds:
+      - .venv/bin/pre-commit install --hook-type pre-commit --hook-type pre-merge-commit --hook-type post-merge
+    preconditions:
+      - test -d .venv
+      - msg: "missing virtual env"

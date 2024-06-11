@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        stages: [pre-commit]
+      - id: trailing-whitespace
+        stages: [pre-commit]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+      - id: ruff-format
+  - repo: https://github.com/myint/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        args: [--in-place, --wrap-summaries=115, --wrap-descriptions=120]  
+  # - repo: https://github.com/pre-commit/mirrors-prettier
+  #   rev: "v3.0.3" # Use the sha or tag you want to point at
+  #   hooks:
+  #     - id: prettier
+  #       stages: [pre-commit]
+  #       exclude_types: ["html"]
