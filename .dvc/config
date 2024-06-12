@@ -1,2 +1,5 @@
 [core]
     analytics = false
+    remote = ningia
+['remote "ningia"']
+    url = gdrive://1adif5uBZgrj5PVNde6_8fPAiepJRUs8Y
