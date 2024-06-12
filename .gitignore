@@ -1,5 +1,7 @@
 # dataset
 raw
+train
+validation
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
