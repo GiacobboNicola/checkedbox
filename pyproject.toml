@@ -1,0 +1,81 @@
+[project]
+name = "checkedbox"
+dynamic = ["version"]
+description = "Simple NN for classification of checkboxes."
+authors = [
+    {name = "Nicola Giacobbo", email = "ningia.coder@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "torch>=2.2.0",
+    "torchvision>=0.17.0",
+    "opencv-python>=4.9.0.80",
+    "imutils>=0.5.4",
+    "configargparse>=1.7",
+    "onnx>=1.16.0",
+    "onnxscript>=0.1.0.dev20240423",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[options.packages.find]
+where = ["src"]
+
+#[project.urls]
+#Documentation = "https://github.com/microsoft/python-package-template/tree/main#readme"
+#Source = "https://github.com/microsoft/python-package-template"
+#Tracker = "https://github.com/microsoft/python-package-template/issues"
+
+[project.scripts]
+run_dnn = "main:run"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.version]
+source = "file"
+path = "src/__init__.py"
+
+[tool.pdm.scripts]
+fmt = "pre-commit run --all-files"
+docs = "mkdocs serve"
+test = "pytest -v tests"
+
+[tool.pdm]
+distribution = true
+
+[tool.mypy]
+strict = true
+
+[tool.black]
+line-length = 120
+fast = true
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+  | \.git
+  | .html
+)/
+'''
+
+# for the documentation
+docs = [
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.2",
+    "mkdocstrings[python]>=0.24.0",
+]
+# for testing
+test = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+]
