@@ -1,5 +1,6 @@
 [core]
     analytics = false
     remote = ningia
+    autostage = true
 ['remote "ningia"']
     url = gdrive://19f3iZdZ91H1fzYJ1qcjgAD56h7OT0kwn
