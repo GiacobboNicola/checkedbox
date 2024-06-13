@@ -14,6 +14,28 @@ tasks:
       - go-task -l
     silent: true
 
+  setup:
+    desc: crate folder to store data
+    cmds:
+      - mkdir -p data/raw/empty data/raw/right data/raw/wrong
+      - mkdir -p data/train/empty data/train/right data/train/wrong
+      - mkdir -p data/validation/empty data/validation/right data/validation/wrong
+
+  data:rm:
+    cmds:
+      - rm -rf data/raw
+
+  data:push:
+    cmds:
+      - rm data/raw.zip
+      - zip -r data/raw.zip data/raw
+
+  data:fetch:
+    cmds:
+      - task: data:rm
+      - .venv/bin/dvc pull
+      - unzip data/raw.zip -d data
+
   venv:
     desc: create/update venv
     cmds:
@@ -24,6 +46,7 @@ tasks:
       - test -d .venv
 
   venv:update:
+    desc: update the virtual environment
     cmds:
       - .venv/bin/pip install -U pdm pip mypy pre-commit
       - .venv/bin/pip install -e ./
