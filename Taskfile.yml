@@ -36,7 +36,7 @@ tasks:
     desc: unzip data and model
     cmds:
       - rm data/raw.zip
-      - cd data; zip -r raw.zip raw models CHANGELOG.md; cd ..
+      - cd ./data; zip -r raw.zip raw models CHANGELOG.md; cd ..
 
   data:fetch:
     cmds:
