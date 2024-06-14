@@ -22,13 +22,21 @@ tasks:
       - mkdir -p data/validation/empty data/validation/right data/validation/wrong
 
   data:rm:
+    desc: remove folder with data
     cmds:
       - rm -rf data/raw
 
   data:push:
+    desc: push data to dvc (gdrive)
+    cmds:
+      - task: data:rm
+      - .venv/bin/dvc push
+
+  data:zip:
+    desc: unzip data and model
     cmds:
       - rm data/raw.zip
-      - zip -r data/raw.zip data/raw
+      - cd data; zip -r raw.zip raw models CHANGELOG.md; cd ..
 
   data:fetch:
     cmds:
