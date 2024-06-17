@@ -3,7 +3,8 @@ raw
 train
 validation
 models
-CHANGELOG.md
+RAW_CHANGELOG.md
+MODEL_CHANGELOG.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
