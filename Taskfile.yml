@@ -26,23 +26,44 @@ tasks:
     cmds:
       - rm -rf data/raw
 
-  data:push:
-    desc: push data to dvc (gdrive)
-    cmds:
-      - task: data:rm
-      - .venv/bin/dvc push
-
   data:zip:
     desc: unzip data and model
     cmds:
       - rm data/raw.zip
-      - cd ./data; zip -r raw.zip raw models CHANGELOG.md; cd ..
+      - cd ./data; zip -r raw.zip raw RAW_CHANGELOG.md; cd ..
 
   data:fetch:
     cmds:
       - task: data:rm
-      - .venv/bin/dvc pull
+      - task: dvc:pull
       - unzip data/raw.zip -d data
+
+  model:rm:
+    desc: remove folder with data
+    cmds:
+      - rm -rf data/train/* data/validation/* data/models/*
+
+  dvc:push:
+    desc: push data and/or model to dvc (gdrive)
+    cmds:
+      #- task: model:rm
+      - .venv/bin/dvc push
+
+  dvc:pull:
+    cmds:
+      - .venv/bin/dvc pull
+
+  model:zip:
+    desc: unzip data and model
+    cmds:
+      - rm data/model.zip
+      - cd ./data; zip -r model.zip models train validation MODEL_CHANGELOG.md; cd ..
+
+  model:fetch:
+    cmds:
+      - task: model:rm
+      - task: dvc:pull
+      - unzip data/model.zip -d data
 
   venv:
     desc: create/update venv
