@@ -44,9 +44,7 @@ tasks:
       - rm -rf data/train/* data/validation/* data/models/*
 
   dvc:push:
-    desc: push data and/or model to dvc (gdrive)
     cmds:
-      #- task: model:rm
       - .venv/bin/dvc push
 
   dvc:pull:
