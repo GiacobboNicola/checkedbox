@@ -1,4 +1,5 @@
 import glob
+import random
 import cv2
 import torch
 from torch.utils.data import Dataset
@@ -7,9 +8,11 @@ from PIL import Image
 
 
 class BoxesDataset(Dataset):
-    def __init__(self, root_dir, in_gray, transform=None, format=".jpg", dims=(45, 45)):
+    def __init__(self, root_dir, in_gray, transform=None, rotate=True, format=".jpg", dims=(45, 45), rotation_thr=0.5):
         self.root_dir = root_dir
         self.transform = transform
+        self.rotate = rotate
+        self.rot_thr = rotation_thr
         self.in_gray = in_gray
         self.img_dim = dims
         self.data = []
@@ -33,15 +36,17 @@ class BoxesDataset(Dataset):
         # not used
         if self.transform:
             img_tensor = self.transform(img)
+        if random.random() >= self.rot_thr and self.rotate:
+            degree = random.choice([cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE])
+            img = cv2.rotate(img, degree)
+
         if self.in_gray:
             pil_img = Image.fromarray(img)
             pil_img = pil_img.convert("L")
             img_tensor = transforms.ToTensor()(pil_img)
         else:
             img_tensor = torch.from_numpy(img)
-            img_tensor = img_tensor.permute(
-                2, 0, 1
-            )  # From Width, Height, Channel to Channel, Width, Height
+            img_tensor = img_tensor.permute(2, 0, 1)  # From Width, Height, Channel to Channel, Width, Height
         class_id = self.class_map[class_name]
         class_id = torch.tensor(class_id)
         return img_tensor.float(), class_id

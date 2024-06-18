@@ -56,7 +56,7 @@ def validation(dnn, validation_set, loss_function, device="cpu", batch_size=64):
     return loss_per_batch
 
 
-def accuracy(dnn, dataset, device="cpu"):
+def accuracy(dnn, dataset, device="cpu", batch_size=64):
     """This function computes accuracy."""
     # setting model state
     dnn.eval()
@@ -65,7 +65,7 @@ def accuracy(dnn, dataset, device="cpu"):
     total_correct = 0
     total_instances = 0
     # creating dataloader
-    dataloader = DataLoader(dataset, 64)
+    dataloader = DataLoader(dataset, batch_size)
 
     # iterating through batches
     with torch.no_grad():
