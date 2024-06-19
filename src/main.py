@@ -13,13 +13,15 @@ accuracy on both sets. The script can also save the trained model.
 
 import os
 import torch
+import numpy as np
+from datetime import datetime
 from torch import nn
 
 # custom modules
 from libs.utils import save_model, set_config
 from libs.dataset import BoxesDataset
 from libs.models import NGConvNet
-from libs.mlops import train, validation, accuracy
+from libs.mlops import train, validation, accuracy, train_transformers
 
 
 def run():
@@ -30,7 +32,7 @@ def run():
     val_dir = os.path.join(config.dataset, "validation/")
 
     # upload the dataset for both training and validation
-    training_set = BoxesDataset(train_dir, config.in_gray, format=".jpg")
+    training_set = BoxesDataset(train_dir, config.in_gray, transform=train_transformers, format=".jpg")
     validation_set = BoxesDataset(val_dir, config.in_gray, format=".jpg")
 
     # instantiating model
@@ -41,7 +43,10 @@ def run():
     # defining optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
 
-    loss_history = []
+    train_history = []
+    validation_history = []
+    loss_history_batches = []
+    accuracy_history = []
 
     # TODO: log config
     for epoch in range(config.epochs):
@@ -50,7 +55,7 @@ def run():
         print(f"Starting epoch {epoch}")
 
         # training_losses
-        loss_train = train(
+        loss_train_batches, loss_train = train(
             model,
             training_set,
             optimizer,
@@ -60,7 +65,7 @@ def run():
         )
 
         # validation_losses
-        loss_validation = validation(
+        loss_validation_batches, loss_validation = validation(
             model,
             validation_set,
             nn.CrossEntropyLoss(),
@@ -68,28 +73,75 @@ def run():
             device=device,
         )
 
-        loss_history.append([loss_train, loss_validation])
+        train_history.append([loss_train])
+        validation_history.append([loss_validation])
+        loss_history_batches.append([loss_train_batches, loss_validation_batches])
 
         training_accuracy = accuracy(model, training_set, device=device, batch_size=config.batches)
         print(f"\ttraining accuracy: {training_accuracy}")
         validation_accuracy = accuracy(model, validation_set, device=device, batch_size=config.batches)
         print(f"\tvalidation accuracy: {validation_accuracy}")
 
+        accuracy_history.append([training_accuracy, validation_accuracy])
+
     if config.save != "not":
         save_model(model, device, config.epochs, config.save)
 
     if config.plot:
+        #! move to utils
         import matplotlib.pyplot as plt
+        from matplotlib.legend_handler import HandlerTuple
 
-        for epoch, losses in enumerate(loss_history):
-            print(len(losses))
-            plt.plot(losses[0], label=f"epoch {epoch}")
+        colors = plt.cm.viridis(np.linspace(0, 1, config.epochs))
 
-        plt.legend()
+        # Placing the plots in the plane
+        plot1 = plt.subplot2grid((2, 4), (0, 0), colspan=2)
+        plot2 = plt.subplot2grid((2, 4), (1, 0), colspan=2)
+        plot3 = plt.subplot2grid((2, 4), (0, 2), rowspan=2, colspan=2)
+
+        train_loss = [losses[0] for losses in loss_history_batches]
+        lines = []
+        for epoch, losses in enumerate(train_loss):
+            (line,) = plot1.plot(losses, color=colors[epoch])
+            lines.append(line)
+        plot1.legend(
+            handles=[tuple(lines)],
+            labels=["Epoch"],
+            handlelength=3,
+            handler_map={tuple: HandlerTuple(ndivide=None, pad=0)},
+        )
+        plot1.set_ylabel("loss")
+
+        validation_loss = [losses[1] for losses in loss_history_batches]
+        lines = []
+        for epoch, losses in enumerate(validation_loss):
+            (line,) = plot2.plot(losses, color=colors[epoch])
+            lines.append(line)
+        plot2.legend(
+            handles=[tuple(lines)],
+            labels=["Epoch"],
+            handlelength=3,
+            handler_map={tuple: HandlerTuple(ndivide=None, pad=0)},
+        )
+        plot2.set_xlabel("batch")
+        plot2.set_ylabel("loss")
+
+        plot3.plot(train_history, color="black", ls="-", label="train")
+        plot3.plot(validation_history, color="red", ls="--", label="Validation")
+
+        plot3.legend()
+        plot3.set_xlabel("epoch")
+        plot3.set_ylabel("loss")
+
+        plt.tight_layout()
 
         if config.save:
             # Saving the figure.
-            plt.savefig(os.path.join(os.getcwd(), "data/plots/loss_plot.jpg"))
+            plt.savefig(
+                os.path.join(
+                    os.getcwd(), f"data/plots/loss_plot_{datetime.now().strftime('%d%m%Y%_H%M%S')}_{config.epochs}.jpg"
+                )
+            )
         else:
             plt.show()
 

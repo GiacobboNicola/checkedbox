@@ -1,17 +1,21 @@
 import torch
 from torch.utils.data import DataLoader
+from torchvision import transforms as T
 
 
 def train(dnn, training_set, optimizer, loss_fuction, device="cpu", batch_size=64):
     """Training function that optimizes the network weights."""
     # creating list to hold loss per batch
     loss_per_batch = []
+    train_loss = 0
 
     # defining dataloader
-    train_loader = DataLoader(training_set, batch_size, shuffle=True)
+    train_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True)
+
+    norm = len(train_loader.dataset) / batch_size
 
     # iterating through batches
-    print("\ttraining ...")
+    print(f"\ttraining ... {len(train_loader)}")
     for images, labels in train_loader:
         # send images to device
         images, labels = images.to(device), labels.to(device)
@@ -22,23 +26,28 @@ def train(dnn, training_set, optimizer, loss_fuction, device="cpu", batch_size=6
         # get the loss
         loss = loss_fuction(classifications, labels)
         loss_per_batch.append(loss.item())
+        train_loss += loss.item()
+
         # compute the gradients
         loss.backward()
         # optimizing the weights
         optimizer.step()
     print("\t... complited!")
 
-    return loss_per_batch
+    return loss_per_batch, train_loss / norm
 
 
 def validation(dnn, validation_set, loss_function, device="cpu", batch_size=64):
     """Validation function that validates the network parameter optimizations."""
     # creating list to hold loss per batch
     loss_per_batch = []
+    validation_loss = 0
     # defining model state
     dnn.eval()
     # defining dataloader
-    val_loader = DataLoader(validation_set, batch_size, shuffle=True)
+    val_loader = DataLoader(validation_set, batch_size=batch_size, shuffle=True)
+
+    norm = len(val_loader.dataset) / batch_size
 
     print("\tvalidating ...")
     with torch.no_grad():
@@ -51,9 +60,10 @@ def validation(dnn, validation_set, loss_function, device="cpu", batch_size=64):
             # computing the loss
             loss = loss_function(classifications, labels)
             loss_per_batch.append(loss.item())
+            validation_loss += loss.item()
     print("\t... complited!")
 
-    return loss_per_batch
+    return loss_per_batch, validation_loss / norm
 
 
 def accuracy(dnn, dataset, device="cpu", batch_size=64):
@@ -79,4 +89,13 @@ def accuracy(dnn, dataset, device="cpu", batch_size=64):
             total_correct += correct_predictions
             total_instances += len(images)
 
-    return round(total_correct / total_instances, 3)
+    return round(total_correct / total_instances, 5)
+
+
+train_transformers = T.Compose(
+    [
+        T.RandomHorizontalFlip(p=0.5),
+        T.RandomVerticalFlip(p=0.5),
+        T.ToTensor(),
+    ]
+)
