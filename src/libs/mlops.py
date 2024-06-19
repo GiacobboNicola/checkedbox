@@ -15,7 +15,7 @@ def train(dnn, training_set, optimizer, loss_fuction, device="cpu", batch_size=6
     norm = len(train_loader.dataset) / batch_size
 
     # iterating through batches
-    print(f"\ttraining ... {len(train_loader)}")
+    #    print(f"\ttraining ... {len(train_loader)}")
     for images, labels in train_loader:
         # send images to device
         images, labels = images.to(device), labels.to(device)
@@ -32,7 +32,7 @@ def train(dnn, training_set, optimizer, loss_fuction, device="cpu", batch_size=6
         loss.backward()
         # optimizing the weights
         optimizer.step()
-    print("\t... complited!")
+    #    print("\t... complited!")
 
     return loss_per_batch, train_loss / norm
 
@@ -49,7 +49,7 @@ def validation(dnn, validation_set, loss_function, device="cpu", batch_size=64):
 
     norm = len(val_loader.dataset) / batch_size
 
-    print("\tvalidating ...")
+    #    print("\tvalidating ...")
     with torch.no_grad():
         # iterating through batches
         for images, labels in val_loader:
@@ -61,7 +61,7 @@ def validation(dnn, validation_set, loss_function, device="cpu", batch_size=64):
             loss = loss_function(classifications, labels)
             loss_per_batch.append(loss.item())
             validation_loss += loss.item()
-    print("\t... complited!")
+    #    print("\t... complited!")
 
     return loss_per_batch, validation_loss / norm
 

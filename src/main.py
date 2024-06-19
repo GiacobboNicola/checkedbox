@@ -22,6 +22,7 @@ from libs.utils import save_model, set_config
 from libs.dataset import BoxesDataset
 from libs.models import NGConvNet
 from libs.mlops import train, validation, accuracy, train_transformers
+from tqdm import tqdm
 
 
 def run():
@@ -47,12 +48,15 @@ def run():
     validation_history = []
     loss_history_batches = []
     accuracy_history = []
+    loss_train = 0.0
+    train_accuracy = 0.0
 
     # TODO: log config
-    for epoch in range(config.epochs):
+    for epoch in (pbar := tqdm(range(config.epochs))):
+        pbar.set_description(f"Epoch {epoch+1}-> loss {round(loss_train,2)} accuracy {round(train_accuracy,2)}")
+
         # training/optimizing parameters
-        # TODO: print log
-        print(f"Starting epoch {epoch}")
+        # TODO: save log
 
         # training_losses
         loss_train_batches, loss_train = train(
@@ -77,12 +81,12 @@ def run():
         validation_history.append([loss_validation])
         loss_history_batches.append([loss_train_batches, loss_validation_batches])
 
-        training_accuracy = accuracy(model, training_set, device=device, batch_size=config.batches)
-        print(f"\ttraining accuracy: {training_accuracy}")
+        train_accuracy = accuracy(model, training_set, device=device, batch_size=config.batches)
+        #        print(f"\ttraining accuracy: {training_accuracy}")
         validation_accuracy = accuracy(model, validation_set, device=device, batch_size=config.batches)
-        print(f"\tvalidation accuracy: {validation_accuracy}")
+        #        print(f"\tvalidation accuracy: {validation_accuracy}")
 
-        accuracy_history.append([training_accuracy, validation_accuracy])
+        accuracy_history.append([train_accuracy, validation_accuracy])
 
     if config.save != "not":
         save_model(model, device, config.epochs, config.save)
