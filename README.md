@@ -9,12 +9,12 @@ Simple NN to classify check-box in three classes: empty, right and wrong.
 
 ## Setup
 
-1. create the virtual envirionment (*venv*): `task venv`
-2. activate the *venv*: `source .venv/bin/activate`
+1. create the virtual envirionment (_venv_): `task venv`
+2. activate the _venv_: `source .venv/bin/activate`
 
 ## Usage
 
-When the *venv* is activated the command **run_dnn** is available:
+When the _venv_ is activated the command **run_dnn** is available:
 
 ```bash
 usage: run_dnn [-h] [-d DATASET] [-e EPOCHS] [-b BATCHES] [-r RATE] [-m MODEL] [-g] [-s {pth,onnx,not}]
@@ -37,3 +37,5 @@ options:
 <!-- ## TOWRITE
 * how to train a new model
 * how to update the dataset -->
+
+- <!-- run_dnn --epochs 100 -d /home/sergio/Documenti/used_dataset/dataset -->
