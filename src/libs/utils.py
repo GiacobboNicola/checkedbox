@@ -8,6 +8,7 @@ import configargparse
 import imutils
 from datetime import datetime
 import numpy as np
+import copy
 
 # =====> Constants
 POSSILE_MODELS = ["NGConvNet"]
@@ -160,19 +161,31 @@ def sp_noise(image, b_prob=0, w_prob=0):
         for j in range(image.shape[1]):
             rdn = random.random()
             if rdn < b_prob:
-                output[i][j] = (0, 0, 255)
+                output[i][j] = 255
             elif rdn < b_prob + w_prob:
-                output[i][j] = (255, 255, 0)
+                output[i][j] = 0
             else:
                 output[i][j] = image[i][j]
     return output
+
+
+def sp_noise(image, n_pixel=2, color=255):
+    n_b = random.randint(0, n_pixel)
+    for _ in range(n_b):
+        x = random.randint(0, image.shape[0] - 1)
+        y = random.randint(0, image.shape[1] - 1)
+        image[x][y] = color
+    return image
 
 
 def debug_sp(img_path):
     img = cv2.imread(img_path)
     # img2 = add_salt_pepper(img, s_vs_p=0.5, amount=0.00004)
 
-    img2 = sp_noise(img, b_prob=0.01, w_prob=0.02)
+    # img2 = sp_noise(img, b_prob=0.001, w_prob=0.001)
+    img2 = copy.copy(img)
+    img2 = sp_noise(img2, n_pixel=5, color=255)
+    img2 = sp_noise(img2, n_pixel=5, color=0)
 
     img = cv2.resize(img, (150, 150))
     img2 = cv2.resize(img2, (150, 150))
