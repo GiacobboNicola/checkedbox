@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from PIL import Image
+from .utils import debug_sp
 
 
 class BoxesDataset(Dataset):
@@ -23,6 +24,7 @@ class BoxesDataset(Dataset):
             class_name = class_path.split("/")[-1]
             for img_path in glob.glob(class_path + "/*" + format):
                 self.data.append([img_path, class_name])
+                debug_sp(img_path)
             self.class_map[class_name] = id
         # exit(-1)
 

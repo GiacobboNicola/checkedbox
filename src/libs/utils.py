@@ -4,6 +4,21 @@ from datetime import datetime
 import configargparse
 import cv2
 import imutils
+from torchvision import transforms
+import random
+import copy
+import numpy as np
+
+
+import torch
+import pandas as pd
+from skimage import io, transform
+import numpy as np
+import matplotlib.pyplot as plt
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, utils
+from skimage.util import random_noise
+
 
 # =====> Constants
 POSSILE_MODELS = ["NGConvNet"]
@@ -115,7 +130,7 @@ def add_salt_pepper(image, s_vs_p=0, amount=0.004):
     return out
 
 
-def sp_noise(image, b_prob=0, w_prob=0):
+def sp_noise2(image, b_prob=0, w_prob=0):
     """
     Add salt and pepper noise to image
     prob: Probability of the noise
@@ -142,14 +157,101 @@ def sp_noise(image, n_pixel=2, color=255):
     return image
 
 
+def sp_noise_tensor(image, n_pixel=2, color=0):
+    n_b = random.randint(0, n_pixel)
+    for _ in range(n_b):
+        x = random.randint(0, image.shape[1] - 1)
+        y = random.randint(0, image.shape[2] - 1)
+        image[0][x][y] = color
+        image[1][x][y] = color
+        image[2][x][y] = color
+    return image
+
+
+class ToTensor(object):
+    """Convert ndarrays in sample to Tensors."""
+
+    def __call__(self, sample):
+        image, landmarks = sample["image"], sample["landmarks"]
+
+        # swap color axis because
+        # numpy image: H x W x C
+        # torch image: C x H x W
+        image = image.transpose((2, 0, 1))
+        return {"image": torch.from_numpy(image), "landmarks": torch.from_numpy(landmarks)}
+
+
+class Rescale(object):
+    """Rescale the image in a sample to a given size.
+
+    Args:
+        output_size (tuple or int): Desired output size. If tuple, output is
+            matched to output_size. If int, smaller of image edges is matched
+            to output_size keeping aspect ratio the same.
+    """
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        self.output_size = output_size
+
+    def __call__(self, sample):
+        image, landmarks = sample["image"], sample["landmarks"]
+
+        h, w = image.shape[:2]
+        if isinstance(self.output_size, int):
+            if h > w:
+                new_h, new_w = self.output_size * h / w, self.output_size
+            else:
+                new_h, new_w = self.output_size, self.output_size * w / h
+        else:
+            new_h, new_w = self.output_size
+
+        new_h, new_w = int(new_h), int(new_w)
+
+        img = transform.resize(image, (new_h, new_w))
+
+        # h and w are swapped for landmarks because for images,
+        # x and y axes are axis 1 and 0 respectively
+        landmarks = landmarks * [new_w / w, new_h / h]
+
+        return {"image": img, "landmarks": landmarks}
+
+
+class Salt(object):
+    """Rescale the image in a sample to a given size.
+
+    Args:
+        output_size (tuple or int): Desired output size. If tuple, output is
+            matched to output_size. If int, smaller of image edges is matched
+            to output_size keeping aspect ratio the same.
+    """
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        self.output_size = output_size
+
+    def __call__(self, sample):
+        image, landmarks = sample["image"], sample["landmarks"]
+        salt_img = torch.tensor(random_noise(image, mode="salt", amount=0.5))
+
+        return {"image": salt_img, "landmarks": landmarks}
+
+
+def addnoise(img, noise_factor=0.8):
+    inputs = transforms.ToTensor()(img)
+    noise = sp_noise_tensor(inputs, n_pixel=20, color=0)
+    noise = sp_noise_tensor(noise, n_pixel=20, color=144)
+    # noise = torch.clip (noise,0,1.)
+    output_image = transforms.ToPILImage()
+    image = output_image(noise)
+    image = np.array(image)
+    return image
+
+
 def debug_sp(img_path):
     img = cv2.imread(img_path)
-    # img2 = add_salt_pepper(img, s_vs_p=0.5, amount=0.00004)
-
-    # img2 = sp_noise(img, b_prob=0.001, w_prob=0.001)
     img2 = copy.copy(img)
-    img2 = sp_noise(img2, n_pixel=5, color=255)
-    img2 = sp_noise(img2, n_pixel=5, color=0)
+    img2 = addnoise(img)
 
     img = cv2.resize(img, (150, 150))
     img2 = cv2.resize(img2, (150, 150))
