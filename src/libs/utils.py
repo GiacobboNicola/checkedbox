@@ -1,11 +1,13 @@
 import glob
 import os
+import random
 import cv2
 from PIL import Image
 import torchvision.transforms as transforms
 import configargparse
 import imutils
 from datetime import datetime
+import numpy as np
 
 # =====> Constants
 POSSILE_MODELS = ["NGConvNet"]
@@ -24,16 +26,10 @@ def set_config():
         default=os.path.join(os.getcwd(), "data"),
         help="path to the dataset",
     )
-    parser.add_argument(
-        "-e", "--epochs", type=int, default=5, help="number of epoch for the training"
-    )
-    parser.add_argument(
-        "-b", "--batches", type=int, default=64, help="number of batches"
-    )
+    parser.add_argument("-e", "--epochs", type=int, default=5, help="number of epoch for the training")
+    parser.add_argument("-b", "--batches", type=int, default=64, help="number of batches")
     parser.add_argument("-r", "--rate", type=float, default=0.001, help="learning rate")
-    parser.add_argument(
-        "-m", "--model", type=_possible_models, default="NGConvNet", help="model to use"
-    )
+    parser.add_argument("-m", "--model", type=_possible_models, default="NGConvNet", help="model to use")
     parser.add_argument("-g", "--in-gray", action="store_true", default=False)
     parser.add_argument("-s", "--save", choices=["pth", "onnx", "not"], default="onnx")
     #    parser.add_argument("-s","--save", action="store_true", default=False)
@@ -113,9 +109,7 @@ def rotate(path, rotations=[0, 90, 180, 270]):
         # check to avoid saving the same rotation multiple times
         if int(name.split("_")[-1]) not in rotations:
             print("saving")
-            cv2.imwrite(
-                os.path.join(path, name + "_" + str(angle) + "." + ext), img_rotated
-            )
+            cv2.imwrite(os.path.join(path, name + "_" + str(angle) + "." + ext), img_rotated)
             to_delete = True
 
     if to_delete:
@@ -137,3 +131,55 @@ def clean(path):
 
     file = os.path.join(path, filename)
     os.remove(file)
+
+
+def add_salt_pepper(image, s_vs_p=0, amount=0.004):
+    """
+    Replaces random pixels with 0 or 1
+    """
+    out = np.copy(image)
+    # Salt mode
+    num_salt = np.ceil(amount * image.size * s_vs_p)
+    coords = [np.random.randint(0, i - 1, int(num_salt)) for i in image.shape]
+    out[coords] = 144
+
+    # Pepper mode
+    num_pepper = np.ceil(amount * image.size * (1.0 - s_vs_p))
+    coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in image.shape]
+    out[coords] = 0
+    return out
+
+
+def sp_noise(image, b_prob=0, w_prob=0):
+    """
+    Add salt and pepper noise to image
+    prob: Probability of the noise
+    """
+    output = np.zeros(image.shape, np.uint8)
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            rdn = random.random()
+            if rdn < b_prob:
+                output[i][j] = (0, 0, 255)
+            elif rdn < b_prob + w_prob:
+                output[i][j] = (255, 255, 0)
+            else:
+                output[i][j] = image[i][j]
+    return output
+
+
+def debug_sp(img_path):
+    img = cv2.imread(img_path)
+    # img2 = add_salt_pepper(img, s_vs_p=0.5, amount=0.00004)
+
+    img2 = sp_noise(img, b_prob=0.01, w_prob=0.02)
+
+    img = cv2.resize(img, (150, 150))
+    img2 = cv2.resize(img2, (150, 150))
+
+    all = np.concatenate(
+        (img, img2),
+        axis=1,
+    )
+    cv2.imshow("test", all)
+    cv2.waitKey(1000)

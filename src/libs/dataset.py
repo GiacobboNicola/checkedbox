@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from PIL import Image
+from libs.utils import debug_sp
 
 
 class BoxesDataset(Dataset):
@@ -20,6 +21,7 @@ class BoxesDataset(Dataset):
             class_name = class_path.split("/")[-1]
             for img_path in glob.glob(class_path + "/*" + format):
                 self.data.append([img_path, class_name])
+                # debug_sp(img_path)
             self.class_map[class_name] = id
         # exit(-1)
 
@@ -39,9 +41,7 @@ class BoxesDataset(Dataset):
             img_tensor = transforms.ToTensor()(pil_img)
         else:
             img_tensor = torch.from_numpy(img)
-            img_tensor = img_tensor.permute(
-                2, 0, 1
-            )  # From Width, Height, Channel to Channel, Width, Height
+            img_tensor = img_tensor.permute(2, 0, 1)  # From Width, Height, Channel to Channel, Width, Height
         class_id = self.class_map[class_name]
         class_id = torch.tensor(class_id)
         return img_tensor.float(), class_id
