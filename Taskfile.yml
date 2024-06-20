@@ -58,7 +58,7 @@ tasks:
     desc: unzip data and model
     cmds:
       - rm data/model.zip
-      - cd ./data; zip -r model.zip models train validation MODEL_CHANGELOG.md; cd ..
+      - cd ./data; zip -r model.zip models train validation plots MODEL_CHANGELOG.md; cd ..
 
   model:fetch:
     cmds:

@@ -94,8 +94,9 @@ def accuracy(dnn, dataset, device="cpu", batch_size=64):
 
 train_transformers = T.Compose(
     [
+        T.PILToTensor(),
+        # T.Resize((45,45)),
         T.RandomHorizontalFlip(p=0.5),
         T.RandomVerticalFlip(p=0.5),
-        T.ToTensor(),
     ]
 )

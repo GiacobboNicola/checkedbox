@@ -30,18 +30,13 @@ class BoxesDataset(Dataset):
         img_path, class_name = self.data[idx]
         img = cv2.imread(img_path)
         img = cv2.resize(img, self.img_dim)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(img)
-
-        if self.in_gray:
-            pil_img = pil_img.convert("L")
-        else:
-            pil_img = pil_img.convert("RGB")
 
         if self.transform:
             img_tensor = self.transform(pil_img)
         else:
-            img_tensor = T.ToTensor()(pil_img)
-
+            img_tensor = T.PILToTensor()(pil_img)
         class_id = self.class_map[class_name]
         class_id = torch.tensor(class_id)
         return img_tensor.float(), class_id
