@@ -1,5 +1,5 @@
 outs:
-- md5: 06acb098a227fa4568aab4b3f454e34c
-  size: 11732667
+- md5: f33d27fbf13ff7ae7b4637a0217d380b
+  size: 5155873
   hash: md5
   path: model.zip
