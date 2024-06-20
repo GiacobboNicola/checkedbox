@@ -3,6 +3,7 @@ raw
 train
 validation
 models
+plots
 RAW_CHANGELOG.md
 MODEL_CHANGELOG.md
 

@@ -15,7 +15,6 @@ tasks:
     silent: true
 
   setup:
-    desc: crate folder to store data
     cmds:
       - mkdir -p data/train/empty data/train/right data/train/wrong
       - mkdir -p data/validation/empty data/validation/right data/validation/wrong
@@ -45,8 +44,7 @@ tasks:
     desc: remove folder with data
     cmds:
       - rm -rf data/train/* data/validation/* data/models/*
-      - mkdir -p data/train/empty data/train/right data/train/wrong
-      - mkdir -p data/validation/empty data/validation/right data/validation/wrong
+      - task: setup
 
   dvc:push:
     cmds:

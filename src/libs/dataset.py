@@ -1,12 +1,9 @@
 import glob
-import random
 import cv2
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
 from PIL import Image
-
-from libs.utils import sp_noise
 
 
 class BoxesDataset(Dataset):
