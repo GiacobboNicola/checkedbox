@@ -29,7 +29,8 @@ class BoxesDataset(Dataset):
     def __getitem__(self, idx):
         img_path, class_name = self.data[idx]
         img = cv2.imread(img_path)
-        img = cv2.resize(img, self.img_dim)
+        # cv2.INTER_LINEAR cv2.INTER_CUBIC cv2.INTER_NEAREST
+        img = cv2.resize(img, self.img_dim, interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(img)
 
