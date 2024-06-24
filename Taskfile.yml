@@ -15,11 +15,13 @@ tasks:
     silent: true
 
   setup:
-    desc: crate folder to store data
     cmds:
-      - mkdir -p data/raw/empty data/raw/right data/raw/wrong
       - mkdir -p data/train/empty data/train/right data/train/wrong
       - mkdir -p data/validation/empty data/validation/right data/validation/wrong
+
+  data:update:
+    cmds:
+      - cd ./data; zip -r raw.zip {{.CLI_ARGS}}
 
   data:rm:
     desc: remove folder with data
@@ -38,11 +40,6 @@ tasks:
       - task: dvc:pull
       - unzip data/raw.zip -d data
 
-  model:rm:
-    desc: remove folder with data
-    cmds:
-      - rm -rf data/train/* data/validation/* data/models/*
-
   dvc:push:
     cmds:
       - .venv/bin/dvc push
@@ -51,11 +48,17 @@ tasks:
     cmds:
       - .venv/bin/dvc pull
 
+  model:rm:
+    desc: remove folder with data
+    cmds:
+      - rm -rf data/train/* data/validation/*
+      - task: setup
+
   model:zip:
     desc: unzip data and model
     cmds:
       - rm data/model.zip
-      - cd ./data; zip -r model.zip models train validation MODEL_CHANGELOG.md; cd ..
+      - cd ./data; zip -r model.zip models train validation plots MODEL_CHANGELOG.md; cd ..
 
   model:fetch:
     cmds:
