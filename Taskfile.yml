@@ -40,12 +40,6 @@ tasks:
       - task: dvc:pull
       - unzip data/raw.zip -d data
 
-  model:rm:
-    desc: remove folder with data
-    cmds:
-      - rm -rf data/train/* data/validation/* data/models/*
-      - task: setup
-
   dvc:push:
     cmds:
       - .venv/bin/dvc push
@@ -53,6 +47,12 @@ tasks:
   dvc:pull:
     cmds:
       - .venv/bin/dvc pull
+
+  model:rm:
+    desc: remove folder with data
+    cmds:
+      - rm -rf data/train/* data/validation/*
+      - task: setup
 
   model:zip:
     desc: unzip data and model

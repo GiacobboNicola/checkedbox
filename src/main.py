@@ -102,6 +102,7 @@ def run():
         plot1 = plt.subplot2grid((2, 4), (0, 0), colspan=2)
         plot2 = plt.subplot2grid((2, 4), (1, 0), colspan=2)
         plot3 = plt.subplot2grid((2, 4), (0, 2), rowspan=2, colspan=2)
+        plot4 = plot3.twinx()
 
         train_loss = [losses[0] for losses in loss_history_batches]
         lines = []
@@ -131,11 +132,18 @@ def run():
         plot2.set_ylabel("loss")
 
         plot3.plot(train_history, color="black", ls="-", label="train")
-        plot3.plot(validation_history, color="red", ls="--", label="Validation")
+        plot3.plot(validation_history, color="red", ls="-", label="Validation")
 
         plot3.legend()
         plot3.set_xlabel("epoch")
         plot3.set_ylabel("loss")
+
+        plot4.plot([ac[0] for ac in accuracy_history], color="black", ls="--", label="train")
+        plot4.plot([ac[1] for ac in accuracy_history], color="red", ls="--", label="Validation")
+
+        plot4.legend()
+        plot4.set_xlabel("epoch")
+        plot4.set_ylabel("accuracy")
 
         plt.tight_layout()
 
