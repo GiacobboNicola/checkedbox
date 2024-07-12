@@ -5,7 +5,8 @@ import random
 import configargparse
 
 # =====> Constants
-POSSILE_MODELS = ["NGConvNet"]
+#! get class name from models
+POSSILE_MODELS = ["NGConvNet", "ResNet18"]
 CLASSES = ["empty", "right", "wrong"]
 DIMS = (45, 45)
 
