@@ -20,7 +20,7 @@ from torch import nn
 # custom modules
 from libs.utils import save_model, set_config
 from libs.dataset import BoxesDataset
-from libs.models import NGConvNet
+from libs.models import NGConvNet, ResNet18
 from libs.mlops import train, validation, accuracy, train_transformers
 from tqdm import tqdm
 
@@ -40,7 +40,11 @@ def run():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # TODO: switch between models according to config.model
-    model = NGConvNet(3, in_gray=config.in_gray).to(device, non_blocking=True)
+    if config.model == "NGConvNet":
+        model = NGConvNet(3, in_gray=config.in_gray).to(device, non_blocking=True)
+    elif config.model == "ResNet18":
+        model = ResNet18(n_classes=3).to(device, non_blocking=True)
+
     # defining optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
 
